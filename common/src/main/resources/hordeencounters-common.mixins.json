@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "com.necro.horde.encounters.common.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "BattleBuilderMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

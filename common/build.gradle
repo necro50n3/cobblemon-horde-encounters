@@ -1,0 +1,22 @@
+architectury {
+    common rootProject.enabled_platforms.split(',')
+}
+
+loom {
+    accessWidenerPath = file("src/main/resources/${rootProject.archives_name}.accesswidener")
+}
+
+repositories {
+    maven {
+        url = "https://www.cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+}
+
+dependencies {
+    modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
+    modImplementation "com.cobblemon:mod:$rootProject.cobblemon_version"
+    modCompileOnly(files "lib/asymmetricbattles-fabric-1.0.0+1.21.1.jar")
+}
