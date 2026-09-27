@@ -8,7 +8,7 @@
     "NecroSo1"
   ],
   "license": "MIT License",
-  "icon": "",
+  "icon": "assets/hordeencounters/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
