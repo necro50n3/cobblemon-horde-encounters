@@ -8,6 +8,8 @@ version = "${version}"
 displayName = "${display_name}"
 authors = "NecroSo1"
 description = "${description}"
+logoFile = "assets/hordeencounters/icon.png"
+displayURL = "https://github.com/necro50n3/cobblemon-horde-encounters"
 
 [[dependencies.hordeencounters]]
 modId = "minecraft"

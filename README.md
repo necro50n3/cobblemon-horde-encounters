@@ -1,5 +1,5 @@
 [![Modrinth](https://img.shields.io/modrinth/dt/BYo4eT2j?style=for-the-badge&logo=modrinth&label=Modrinth)](https://modrinth.com/mod/BYo4eT2j)
-[![CurseForge Downloads](https://img.shields.io/curseforge/dt/-------?style=for-the-badge&logo=curseforge&label=Curseforge)]()
+[![CurseForge](https://img.shields.io/curseforge/dt/1717500?style=for-the-badge&logo=curseforge&label=Curseforge)](https://www.curseforge.com/minecraft/mc-mods/cobblemon-horde-encounters)
 [![Discord](https://img.shields.io/discord/1355016729679499284?style=for-the-badge&logo=discord&label=Discord)](https://discord.gg/6jBar3y6nt)
 [![GitHub](https://img.shields.io/badge/GitHub-565656?style=for-the-badge&logo=github)](https://github.com/necro50n3/cobblemon-horde-encounters)
 
