@@ -7,6 +7,10 @@
   "authors": [
     "NecroSo1"
   ],
+  "contact": {
+    "homepage": "https://github.com/necro50n3/cobblemon-horde-encounters",
+    "issues": "https://github.com/necro50n3/cobblemon-horde-encounters/issues"
+  },
   "license": "MIT License",
   "icon": "assets/hordeencounters/icon.png",
   "environment": "*",
@@ -21,8 +25,7 @@
   "custom": {
     "modmenu": {
       "links": {
-        "modmenu.discord": "https://discord.gg/6jBar3y6nt",
-        "modmenu.wiki": "https://github.com/necro50n3/cobblemon-horde-encounters"
+        "modmenu.discord": "https://discord.gg/6jBar3y6nt"
       }
     }
   },
