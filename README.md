@@ -13,3 +13,48 @@ Pokémon that spawn in herds (up to 6) now all join the battle at the same time.
 
 ## Dependencies
 - [Asymmetric Battles API](https://github.com/necro50n3/asymmetric-battles-api)
+
+## Custom Spawning
+### Basic Spawning (Config)
+You can set up basic spawn settings with the `spawn_overrides` config value.
+This allows for customising call rates, level ranges and Pokémon spawns.
+
+The only required field is `properties`.
+```
+-   properties: charizard alpha
+    horde_rate: 0.03
+    spawn_weights:
+        charmander: 10.0
+    level_offset:
+        min: -5
+        max: 0
+```
+
+### Advanced Spawning (Datapack)
+Advanced spawn settings allow for additional conditional spawning, conditional weights, and level ranges or level range offsets per-spawn.
+Advanced spawning entries must be in the `data/<namespace>/battle_spawns/horde` directory.
+Supports `conditions`, `anticonditions`, and `weightMultipliers`. Additionally supports registration conditions `neededInstalledMods` and `neededUninstalledMods`.
+Refer to Cobblemon's [Spawn Detail Presets](https://wiki.cobblemon.com/index.php/Spawn_Detail_Presets).
+
+
+The only required field is `pokemon`.
+```
+{
+    "pokemon": "wooper paldean",
+    "hordeRate": 0.03,
+    "spawns": [
+        {
+            "pokemon": "wooper paldean",
+            "weight": 10.0,
+            "level": "20-25"
+        },
+        {
+            "pokemon": "clodsire",
+            "levelOffset": "-5-10",
+            "conditions": {
+                "isRaining": true
+            }
+        }
+    ]
+}
+```
