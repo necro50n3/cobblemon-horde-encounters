@@ -41,8 +41,8 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
     modImplementation "net.fabricmc:fabric-language-kotlin:$rootProject.fabric_kotlin"
     modImplementation "com.cobblemon:fabric:$rootProject.cobblemon_version"
-    modImplementation(files "lib/asymmetricbattles-fabric-1.0.0+1.21.1.jar")
-    modRuntimeOnly("fuzs.forgeconfigapiport:forgeconfigapiport-fabric:$rootProject.forge_config_api_version")
+    modImplementation "com.necro.asymmetric.battles:asymmetricbattles-fabric:$rootProject.asymmetricbattles_version"
+    modRuntimeOnly "me.shedaniel.cloth:cloth-config-fabric:$rootProject.cloth_config_version"
     modRuntimeOnly "com.terraformersmc:modmenu:11.0.3"
 
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }

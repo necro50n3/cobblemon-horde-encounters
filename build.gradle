@@ -31,6 +31,7 @@ subprojects {
     }
 
     repositories {
+        mavenLocal()
         maven { url = "https://maven.impactdev.net/repository/development/" }
         maven { url = "https://thedarkcolour.github.io/KotlinForForge/"}
         maven { url = "https://api.modrinth.com/maven" }
