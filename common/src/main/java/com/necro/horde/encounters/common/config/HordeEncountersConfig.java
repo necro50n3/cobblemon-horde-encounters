@@ -39,7 +39,7 @@ public class HordeEncountersConfig implements ConfigData {
         \s
         Example:
         -   properties: charizard
-            call_rate: 0.03
+            horde_rate: 0.03
             spawn_weights:
                 charmander: 10.0
             level_offset:
