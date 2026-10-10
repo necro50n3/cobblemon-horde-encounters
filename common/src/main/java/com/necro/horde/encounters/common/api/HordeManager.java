@@ -39,7 +39,7 @@ public class HordeManager {
         this.pokemon = pokemonEntity.getPokemon();
         this.properties = this.pokemon.createPokemonProperties(PropertyExtractors.LONG_EXTRACTOR);
         this.properties.setAspects(new HashSet<>(this.pokemon.getAspects()));
-        HordeBattleSpawnPool pool = (HordeBattleSpawnPool) SpawnPoolTypeRegistry.get("sos", pokemonEntity);
+        HordeBattleSpawnPool pool = (HordeBattleSpawnPool) SpawnPoolTypeRegistry.get("horde", pokemonEntity);
         this.pool = pool != null ? pool : HordeBattleSpawnPool.create(this.pokemon);
         this.random = pokemonEntity.getRandom();
     }

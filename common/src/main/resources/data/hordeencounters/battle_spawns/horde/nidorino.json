@@ -1,0 +1,11 @@
+{
+    "pokemon": "nidorino",
+    "spawns": [
+        {
+            "pokemon": "nidoranf"
+        },
+        {
+            "pokemon": "nidoranm"
+        }
+    ]
+}

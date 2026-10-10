@@ -14,7 +14,7 @@ import net.minecraft.server.packs.PackType;
 public class HordeEncountersEvents {
     public static void init() {
         ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(
-            new BattleSpawnReloadListener(ResourceLocation.fromNamespaceAndPath(HordeEncounters.MODID, "sos"),
+            new BattleSpawnReloadListener(ResourceLocation.fromNamespaceAndPath(HordeEncounters.MODID, "horde"),
                 "horde",
                 BattleSpawnPool.GSON,
                 HordeBattleSpawnPool.class
