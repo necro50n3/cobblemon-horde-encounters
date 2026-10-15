@@ -1,6 +1,5 @@
 package com.necro.horde.encounters.fabric.events;
 
-import com.necro.asymmetric.battles.common.api.spawning.BattleSpawnPool;
 import com.necro.asymmetric.battles.common.registry.SpawnPoolTypeRegistry;
 import com.necro.asymmetric.battles.fabric.reloader.BattleSpawnReloadListener;
 import com.necro.horde.encounters.common.HordeEncounters;
@@ -16,7 +15,7 @@ public class HordeEncountersEvents {
         ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(
             new BattleSpawnReloadListener(ResourceLocation.fromNamespaceAndPath(HordeEncounters.MODID, "horde"),
                 "horde",
-                BattleSpawnPool.GSON,
+                HordeBattleSpawnPool.GSON,
                 HordeBattleSpawnPool.class
             ));
 

@@ -1,6 +1,5 @@
 package com.necro.horde.encounters.neoforge.events;
 
-import com.necro.asymmetric.battles.common.api.spawning.BattleSpawnPool;
 import com.necro.asymmetric.battles.common.registry.SpawnPoolTypeRegistry;
 import com.necro.asymmetric.battles.neoforge.reloader.BattleSpawnReloadListener;
 import com.necro.horde.encounters.common.HordeEncounters;
@@ -16,7 +15,7 @@ import net.neoforged.neoforge.event.server.ServerStartingEvent;
 public class HordeEncountersEvents {
     @SubscribeEvent
     private static void onReloadDataPack(AddReloadListenerEvent event) {
-        event.addListener(new BattleSpawnReloadListener("horde", BattleSpawnPool.GSON, HordeBattleSpawnPool.class));
+        event.addListener(new BattleSpawnReloadListener("horde", HordeBattleSpawnPool.GSON, HordeBattleSpawnPool.class));
     }
 
     @SubscribeEvent

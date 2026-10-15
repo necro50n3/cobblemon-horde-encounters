@@ -1,6 +1,14 @@
 package com.necro.horde.encounters.common.spawning;
 
+import com.cobblemon.mod.common.api.pokemon.PokemonProperties;
 import com.cobblemon.mod.common.pokemon.Pokemon;
+import com.cobblemon.mod.common.util.adapters.IntRangeAdapter;
+import com.cobblemon.mod.common.util.adapters.PokemonPropertiesAdapterKt;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+import com.necro.asymmetric.battles.common.api.spawning.BattleSpawnDetail;
+import com.necro.asymmetric.battles.common.api.spawning.BattleSpawnDetailListAdapter;
 import com.necro.asymmetric.battles.common.api.spawning.BattleSpawnPool;
 import com.necro.asymmetric.battles.common.util.PropertyExtractors;
 import com.necro.horde.encounters.common.HordeEncounters;
@@ -8,8 +16,16 @@ import kotlin.ranges.IntRange;
 import net.minecraft.util.RandomSource;
 
 import java.util.HashSet;
+import java.util.List;
 
 public class HordeBattleSpawnPool extends BattleSpawnPool {
+    public static final Gson GSON = new GsonBuilder()
+        .registerTypeAdapter(PokemonProperties.class, PokemonPropertiesAdapterKt.getPokemonPropertiesShortAdapter())
+        .registerTypeAdapter(BattleSpawnDetail.class, new BattleSpawnDetail())
+        .registerTypeAdapter(new TypeToken<List<BattleSpawnDetail>>(){}.getType(), new BattleSpawnDetailListAdapter())
+        .registerTypeAdapter(IntRange.class, IntRangeAdapter.INSTANCE)
+        .create();
+
     public Double hordeRate = null;
     public IntRange size = null;
 
