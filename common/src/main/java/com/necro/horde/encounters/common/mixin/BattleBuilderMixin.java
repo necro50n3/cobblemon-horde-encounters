@@ -42,7 +42,7 @@ public class BattleBuilderMixin {
     @Unique
     private @Nullable BattleStartResult horde_startHerdHorde(ServerPlayer player, PokemonEntity pokemonEntity, UUID leadingPokemon) {
         if (!HordeEncounters.CONFIG.enable_herd_hordes) return null;
-        HordeBattleStartEvent.Pre preEvent = new HordeBattleStartEvent.Pre(pokemonEntity);
+        HordeBattleStartEvent.Pre preEvent = new HordeBattleStartEvent.Pre(player, pokemonEntity);
         HordeEvents.HERD_HORDE_BATTLE_START_PRE.emit(preEvent);
         if (preEvent.isCanceled()) return null;
         BattleParticipant<HordeBattleActor> horde = BattleParticipant.horde(pokemonEntity);
@@ -53,7 +53,7 @@ public class BattleBuilderMixin {
                     .filter(pokemon -> pokemon.getBattlePokemon() != null)
                     .map(pokemon -> pokemon.getBattlePokemon().getEntity())
                     .toList();
-                HordeBattleStartEvent.Post postEvent = new HordeBattleStartEvent.Post(entities);
+                HordeBattleStartEvent.Post postEvent = new HordeBattleStartEvent.Post(player, entities, battle);
                 HordeEvents.HERD_HORDE_BATTLE_START_POST.emit(postEvent);
                 return Unit.INSTANCE;
             });
@@ -65,16 +65,16 @@ public class BattleBuilderMixin {
         else if (!ConfigCache.canHorde(pokemonEntity)) return null;
 
         HordeManager manager = new HordeManager(pokemonEntity);
-        if (!manager.shouldHorde(pokemonEntity)) return null;
+        if (!manager.shouldHorde(player, pokemonEntity)) return null;
 
-        HordeBattleStartEvent.Pre preEvent = new HordeBattleStartEvent.Pre(pokemonEntity);
+        HordeBattleStartEvent.Pre preEvent = new HordeBattleStartEvent.Pre(player, pokemonEntity);
         HordeEvents.RANDOM_HORDE_BATTLE_START_PRE.emit(preEvent);
         if (preEvent.isCanceled()) return null;
 
         List<PokemonEntity> horde = manager.spawnHorde(player, pokemonEntity, leadingPokemon);
         return AsymmetricBattleBuilder.hordeBattle(BattleParticipant.player(player, leadingPokemon), BattleParticipant.horde(horde))
             .ifSuccessful(battle -> {
-                HordeBattleStartEvent.Post postEvent = new HordeBattleStartEvent.Post(Collections.unmodifiableList(horde));
+                HordeBattleStartEvent.Post postEvent = new HordeBattleStartEvent.Post(player, Collections.unmodifiableList(horde), battle);
                 HordeEvents.RANDOM_HORDE_BATTLE_START_POST.emit(postEvent);
                 return Unit.INSTANCE;
             })

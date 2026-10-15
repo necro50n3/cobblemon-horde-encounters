@@ -46,8 +46,8 @@ public class HordeManager {
         this.random = pokemonEntity.getRandom();
     }
 
-    public boolean shouldHorde(PokemonEntity pokemonEntity) {
-        HordeBattleRollEvent event = new HordeBattleRollEvent(pokemonEntity, this.pool.hordeRate());
+    public boolean shouldHorde(ServerPlayer player, PokemonEntity pokemonEntity) {
+        HordeBattleRollEvent event = new HordeBattleRollEvent(player, pokemonEntity, this.pool.hordeRate());
         HordeEvents.RANDOM_HORDE_BATTLE_ROLL.emit(event);
         return event.roll(this.random);
     }
