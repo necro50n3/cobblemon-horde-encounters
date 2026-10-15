@@ -57,7 +57,8 @@ public class HordeManager {
 
         List<PokemonEntity> horde = new ArrayList<>();
         horde.add(pokemonEntity);
-        for (int i = 0; i < 4; i++) {
+        int size = this.pool.size(this.random);
+        for (int i = 0; i < size; i++) {
             Pokemon pokemon = AsymmetricAPI.getRandomBattleSpawn(
                 this.pool,
                 player,

@@ -12,6 +12,9 @@ public class HordeEncountersConfig implements ConfigData {
     @Comment("Whether to enable random horde encounters. Encounters from wild herds are unaffected.")
     public boolean enable_random_hordes = true;
 
+    @Comment("Default horde size for horde encounters.")
+    public int default_horde_size = 5;
+
     @Comment("Default random horde encounter rate.")
     public double default_horde_rate = 0.05;
 
