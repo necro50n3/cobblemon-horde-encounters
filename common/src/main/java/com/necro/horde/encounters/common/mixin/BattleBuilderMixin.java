@@ -11,6 +11,8 @@ import com.necro.asymmetric.battles.common.api.actor.HordeBattleActor;
 import com.necro.horde.encounters.common.HordeEncounters;
 import com.necro.horde.encounters.common.api.HordeManager;
 import com.necro.horde.encounters.common.config.ConfigCache;
+import com.necro.horde.encounters.common.events.HordeBattleStartEvent;
+import com.necro.horde.encounters.common.events.HordeEvents;
 import kotlin.Unit;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
@@ -20,6 +22,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,8 +42,21 @@ public class BattleBuilderMixin {
     @Unique
     private @Nullable BattleStartResult horde_startHerdHorde(ServerPlayer player, PokemonEntity pokemonEntity, UUID leadingPokemon) {
         if (!HordeEncounters.CONFIG.enable_herd_hordes) return null;
+        HordeBattleStartEvent.Pre preEvent = new HordeBattleStartEvent.Pre(pokemonEntity);
+        HordeEvents.HERD_HORDE_BATTLE_START_PRE.emit(preEvent);
+        if (preEvent.isCanceled()) return null;
         BattleParticipant<HordeBattleActor> horde = BattleParticipant.horde(pokemonEntity);
-        return horde != null ? AsymmetricBattleBuilder.hordeBattle(BattleParticipant.player(player, leadingPokemon), horde) : null;
+        if (horde == null) return null;
+        return AsymmetricBattleBuilder.hordeBattle(BattleParticipant.player(player, leadingPokemon), horde)
+            .ifSuccessful(battle -> {
+                List<PokemonEntity> entities = battle.getSide2().getActivePokemon().stream()
+                    .filter(pokemon -> pokemon.getBattlePokemon() != null)
+                    .map(pokemon -> pokemon.getBattlePokemon().getEntity())
+                    .toList();
+                HordeBattleStartEvent.Post postEvent = new HordeBattleStartEvent.Post(entities);
+                HordeEvents.HERD_HORDE_BATTLE_START_POST.emit(postEvent);
+                return Unit.INSTANCE;
+            });
     }
 
     @Unique
@@ -49,10 +65,20 @@ public class BattleBuilderMixin {
         else if (!ConfigCache.canHorde(pokemonEntity)) return null;
 
         HordeManager manager = new HordeManager(pokemonEntity);
-        if (!manager.shouldHorde()) return null;
+        if (!manager.shouldHorde(pokemonEntity)) return null;
+
+        HordeBattleStartEvent.Pre preEvent = new HordeBattleStartEvent.Pre(pokemonEntity);
+        HordeEvents.RANDOM_HORDE_BATTLE_START_PRE.emit(preEvent);
+        if (preEvent.isCanceled()) return null;
 
         List<PokemonEntity> horde = manager.spawnHorde(player, pokemonEntity, leadingPokemon);
-        return AsymmetricBattleBuilder.hordeBattle(BattleParticipant.player(player, leadingPokemon), BattleParticipant.horde(horde)).ifErrored(error -> {
+        return AsymmetricBattleBuilder.hordeBattle(BattleParticipant.player(player, leadingPokemon), BattleParticipant.horde(horde))
+            .ifSuccessful(battle -> {
+                HordeBattleStartEvent.Post postEvent = new HordeBattleStartEvent.Post(Collections.unmodifiableList(horde));
+                HordeEvents.RANDOM_HORDE_BATTLE_START_POST.emit(postEvent);
+                return Unit.INSTANCE;
+            })
+            .ifErrored(error -> {
                 horde.forEach(entity -> {
                     if (!entity.isRemoved()) entity.discard();
                 });

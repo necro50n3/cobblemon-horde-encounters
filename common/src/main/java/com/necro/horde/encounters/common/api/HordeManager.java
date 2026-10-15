@@ -11,6 +11,8 @@ import com.necro.asymmetric.battles.common.registry.SpawnPoolTypeRegistry;
 import com.necro.asymmetric.battles.common.util.IBattleSpawn;
 import com.necro.asymmetric.battles.common.util.PropertyExtractors;
 import com.necro.horde.encounters.common.HordeEncounters;
+import com.necro.horde.encounters.common.events.HordeBattleRollEvent;
+import com.necro.horde.encounters.common.events.HordeEvents;
 import com.necro.horde.encounters.common.spawning.HordeBattleSpawnPool;
 import kotlin.Unit;
 import kotlin.ranges.IntRange;
@@ -44,8 +46,10 @@ public class HordeManager {
         this.random = pokemonEntity.getRandom();
     }
 
-    public boolean shouldHorde() {
-        return this.random.nextDouble() < this.pool.hordeRate();
+    public boolean shouldHorde(PokemonEntity pokemonEntity) {
+        HordeBattleRollEvent event = new HordeBattleRollEvent(pokemonEntity, this.pool.hordeRate());
+        HordeEvents.RANDOM_HORDE_BATTLE_ROLL.emit(event);
+        return event.roll(this.random);
     }
 
     public List<PokemonEntity> spawnHorde(ServerPlayer player, PokemonEntity pokemonEntity, UUID leadingPokemon) {
