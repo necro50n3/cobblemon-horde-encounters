@@ -31,23 +31,41 @@ import java.util.UUID;
 public class BattleBuilderMixin {
     @Inject(method = "pve*", at = @At("HEAD"), remap = false, cancellable = true)
     private void pveHordeBattle(ServerPlayer player, PokemonEntity pokemonEntity, UUID leadingPokemon, BattleFormat battleFormat, boolean cloneParties, boolean healFirst, float fleeDistance, PartyStore party, CallbackInfoReturnable<BattleStartResult> cir) {
-        BattleStartResult herdStart = this.horde_startHerdHorde(player, pokemonEntity, leadingPokemon);
+        BattleStartResult featureStart = this.horde_startFeatureHorde(player, pokemonEntity, leadingPokemon, cir);
+        if (featureStart != null) {
+            cir.setReturnValue(featureStart);
+            return;
+        }
+
+        BattleStartResult herdStart = this.horde_startHerdHorde(player, pokemonEntity, leadingPokemon, cir);
         if (herdStart != null) {
             cir.setReturnValue(herdStart);
             return;
         }
-        BattleStartResult randomStart = this.horde_startRandomHorde(player, pokemonEntity, leadingPokemon);
+
+        BattleStartResult randomStart = this.horde_startRandomHorde(player, pokemonEntity, leadingPokemon, cir);
         if (randomStart != null) cir.setReturnValue(randomStart);
     }
 
     @Unique
-    private @Nullable BattleStartResult horde_startHerdHorde(ServerPlayer player, PokemonEntity pokemonEntity, UUID leadingPokemon) {
+    private @Nullable BattleStartResult horde_startFeatureHorde(ServerPlayer player, PokemonEntity pokemonEntity, UUID leadingPokemon, CallbackInfoReturnable<BattleStartResult> cir) {
+        IntSpeciesFeature feature = pokemonEntity.getPokemon().getFeature("horde_size");
+        if (feature == null || feature.getValue() == 0) return null;
+        else if (feature.getValue() == 1) return cir.getReturnValue();
+        HordeManager manager = new HordeManager(pokemonEntity);
+        return this.horde_actuallyStartRandomHorde(player, pokemonEntity, leadingPokemon, manager, feature, cir);
+    }
+
+    @Unique
+    private @Nullable BattleStartResult horde_startHerdHorde(ServerPlayer player, PokemonEntity pokemonEntity, UUID leadingPokemon, CallbackInfoReturnable<BattleStartResult> cir) {
         if (!HordeEncounters.CONFIG.enable_herd_hordes) return null;
-        HordeBattleStartEvent.Pre preEvent = new HordeBattleStartEvent.Pre(player, pokemonEntity);
-        HordeEvents.HERD_HORDE_BATTLE_START_PRE.emit(preEvent);
-        if (preEvent.isCanceled()) return null;
         BattleParticipant<HordeBattleActor> horde = BattleParticipant.horde(pokemonEntity);
         if (horde == null) return null;
+
+        HordeBattleStartEvent.Pre preEvent = new HordeBattleStartEvent.Pre(player, pokemonEntity);
+        HordeEvents.HERD_HORDE_BATTLE_START_PRE.emit(preEvent);
+        if (preEvent.isCanceled()) return cir.getReturnValue();
+
         return AsymmetricBattleBuilder.hordeBattle(BattleParticipant.player(player, leadingPokemon), horde)
             .ifSuccessful(battle -> {
                 List<PokemonEntity> entities = battle.getSide2().getActivePokemon().stream()
@@ -61,27 +79,21 @@ public class BattleBuilderMixin {
     }
 
     @Unique
-    private @Nullable BattleStartResult horde_startRandomHorde(ServerPlayer player, PokemonEntity pokemonEntity, UUID leadingPokemon) {
-        IntSpeciesFeature feature = pokemonEntity.getPokemon().getFeature("horde_size");
-        if (feature != null && feature.getValue() > 0) {
-            if (feature.getValue() == 1) return null;
-            HordeManager manager = new HordeManager(pokemonEntity);
-            return this.horde_actuallyStartRandomHorde(player, pokemonEntity, leadingPokemon, manager, feature);
-        }
-        else if (!HordeEncounters.CONFIG.enable_random_hordes) return null;
+    private @Nullable BattleStartResult horde_startRandomHorde(ServerPlayer player, PokemonEntity pokemonEntity, UUID leadingPokemon, CallbackInfoReturnable<BattleStartResult> cir) {
+        if (!HordeEncounters.CONFIG.enable_random_hordes) return null;
         else if (!ConfigCache.canHorde(pokemonEntity)) return null;
 
         HordeManager manager = new HordeManager(pokemonEntity);
         if (!manager.shouldHorde(player, pokemonEntity)) return null;
 
-        return this.horde_actuallyStartRandomHorde(player, pokemonEntity, leadingPokemon, manager, null);
+        return this.horde_actuallyStartRandomHorde(player, pokemonEntity, leadingPokemon, manager, null, cir);
     }
 
     @Unique
-    private @Nullable BattleStartResult horde_actuallyStartRandomHorde(ServerPlayer player, PokemonEntity pokemonEntity, UUID leadingPokemon, HordeManager manager, @Nullable IntSpeciesFeature hordeSize) {
+    private @Nullable BattleStartResult horde_actuallyStartRandomHorde(ServerPlayer player, PokemonEntity pokemonEntity, UUID leadingPokemon, HordeManager manager, @Nullable IntSpeciesFeature hordeSize, CallbackInfoReturnable<BattleStartResult> cir) {
         HordeBattleStartEvent.Pre preEvent = new HordeBattleStartEvent.Pre(player, pokemonEntity);
         HordeEvents.RANDOM_HORDE_BATTLE_START_PRE.emit(preEvent);
-        if (preEvent.isCanceled()) return null;
+        if (preEvent.isCanceled()) return cir.getReturnValue();
 
         List<PokemonEntity> horde = manager.spawnHorde(player, pokemonEntity, leadingPokemon, hordeSize);
         return AsymmetricBattleBuilder.hordeBattle(BattleParticipant.player(player, leadingPokemon), BattleParticipant.horde(horde))
