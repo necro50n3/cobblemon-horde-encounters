@@ -11,6 +11,7 @@ import com.mojang.logging.LogUtils;
 import com.necro.asymmetric.battles.common.config.serializer.PrimitiveYamlConfigSerializer;
 import com.necro.asymmetric.battles.common.util.IBattleSpawn;
 import com.necro.horde.encounters.common.config.HordeEncountersConfig;
+import com.necro.horde.encounters.common.events.HordeEvents;
 import me.shedaniel.autoconfig.AutoConfig;
 import org.slf4j.Logger;
 
@@ -29,6 +30,8 @@ public class HordeEncounters {
 
         AutoConfig.register(HordeEncountersConfig .class, PrimitiveYamlConfigSerializer::new);
         CONFIG = AutoConfig.getConfigHolder(HordeEncountersConfig.class).getConfig();
+
+        HordeEvents.init();
 
         CobblemonEvents.BATTLE_FLED.subscribe(Priority.LOWEST, (Consumer<BattleFledEvent>) event -> despawnHordeOnFlee(event.getBattle()));
         PlatformEvents.SERVER_PLAYER_LOGOUT.subscribe(Priority.HIGHEST, event -> {
