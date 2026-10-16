@@ -12,6 +12,9 @@ public class HordeEncountersConfig implements ConfigData {
     @Comment("Whether to enable random horde encounters. Encounters from wild herds are unaffected.")
     public boolean enable_random_hordes = true;
 
+    @Comment("Whether to enable the Sweet Scent effect to force a random horde encounter.")
+    public boolean enable_sweet_scent = true;
+
     @Comment("Default horde size for horde encounters.")
     public int default_horde_size = 5;
 

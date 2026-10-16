@@ -1,6 +1,7 @@
 package com.necro.horde.encounters.common.mixin;
 
 import com.mojang.authlib.GameProfile;
+import com.necro.horde.encounters.common.HordeEncounters;
 import com.necro.horde.encounters.common.effect.HordeEffects;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
@@ -21,6 +22,7 @@ public abstract class ServerPlayerMixin extends Player {
 
     @Inject(method = "completeUsingItem", at = @At("HEAD"))
     private void addSweetScent(CallbackInfo ci) {
+        if (!HordeEncounters.CONFIG.enable_sweet_scent) return;
         if (!this.useItem.isEmpty() && this.isUsingItem() && this.useItem.is(Items.HONEY_BOTTLE)) {
             this.addEffect(new MobEffectInstance(HordeEffects.SWEET_SCENT, 1200, 0, false, false, true));
         }

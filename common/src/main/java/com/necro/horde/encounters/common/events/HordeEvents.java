@@ -3,6 +3,7 @@ package com.necro.horde.encounters.common.events;
 import com.cobblemon.mod.common.api.Priority;
 import com.cobblemon.mod.common.api.reactive.CancelableObservable;
 import com.cobblemon.mod.common.api.reactive.SimpleObservable;
+import com.necro.horde.encounters.common.HordeEncounters;
 import com.necro.horde.encounters.common.effect.HordeEffects;
 
 public class HordeEvents {
@@ -14,7 +15,9 @@ public class HordeEvents {
 
     public static void init() {
         RANDOM_HORDE_BATTLE_ROLL.subscribe(Priority.NORMAL, event -> {
+            if (!HordeEncounters.CONFIG.enable_sweet_scent) return;
             if (!event.player().hasEffect(HordeEffects.SWEET_SCENT)) return;
+            else if (event.player().level().isRaining()) return;
             event.set(1.0);
             event.player().removeEffect(HordeEffects.SWEET_SCENT);
         });
