@@ -1,0 +1,7 @@
+{
+    "type": "integer",
+    "keys": ["horde_size"],
+    "default": 0,
+    "min": 0,
+    "max": 6
+}

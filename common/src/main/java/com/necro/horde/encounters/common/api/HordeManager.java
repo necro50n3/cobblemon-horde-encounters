@@ -2,6 +2,7 @@ package com.necro.horde.encounters.common.api;
 
 import com.cobblemon.mod.common.api.drop.DropTable;
 import com.cobblemon.mod.common.api.pokemon.PokemonProperties;
+import com.cobblemon.mod.common.api.pokemon.feature.IntSpeciesFeature;
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.cobblemon.mod.common.util.PlayerExtensionsKt;
@@ -25,6 +26,7 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -52,12 +54,12 @@ public class HordeManager {
         return event.roll(this.random);
     }
 
-    public List<PokemonEntity> spawnHorde(ServerPlayer player, PokemonEntity pokemonEntity, UUID leadingPokemon) {
+    public List<PokemonEntity> spawnHorde(ServerPlayer player, PokemonEntity pokemonEntity, UUID leadingPokemon, @Nullable IntSpeciesFeature hordeSize) {
         Vec3 playerPos = this.playerPosition(player, PlayerExtensionsKt.party(player).get(leadingPokemon), pokemonEntity);
 
         List<PokemonEntity> horde = new ArrayList<>();
         horde.add(pokemonEntity);
-        int size = this.pool.size(this.random);
+        int size = hordeSize != null ? hordeSize.getValue() - 1 : this.pool.size(this.random);
         for (int i = 0; i < size; i++) {
             Pokemon pokemon = AsymmetricAPI.getRandomBattleSpawn(
                 this.pool,

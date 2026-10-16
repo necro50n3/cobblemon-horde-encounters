@@ -1,5 +1,6 @@
 package com.necro.horde.encounters.common.mixin;
 
+import com.cobblemon.mod.common.api.pokemon.feature.IntSpeciesFeature;
 import com.cobblemon.mod.common.api.storage.party.PartyStore;
 import com.cobblemon.mod.common.battles.BattleBuilder;
 import com.cobblemon.mod.common.battles.BattleFormat;
@@ -61,17 +62,28 @@ public class BattleBuilderMixin {
 
     @Unique
     private @Nullable BattleStartResult horde_startRandomHorde(ServerPlayer player, PokemonEntity pokemonEntity, UUID leadingPokemon) {
-        if (!HordeEncounters.CONFIG.enable_random_hordes) return null;
+        IntSpeciesFeature feature = pokemonEntity.getPokemon().getFeature("horde_size");
+        if (feature != null && feature.getValue() > 0) {
+            if (feature.getValue() == 1) return null;
+            HordeManager manager = new HordeManager(pokemonEntity);
+            return this.horde_actuallyStartRandomHorde(player, pokemonEntity, leadingPokemon, manager, feature);
+        }
+        else if (!HordeEncounters.CONFIG.enable_random_hordes) return null;
         else if (!ConfigCache.canHorde(pokemonEntity)) return null;
 
         HordeManager manager = new HordeManager(pokemonEntity);
         if (!manager.shouldHorde(player, pokemonEntity)) return null;
 
+        return this.horde_actuallyStartRandomHorde(player, pokemonEntity, leadingPokemon, manager, null);
+    }
+
+    @Unique
+    private @Nullable BattleStartResult horde_actuallyStartRandomHorde(ServerPlayer player, PokemonEntity pokemonEntity, UUID leadingPokemon, HordeManager manager, @Nullable IntSpeciesFeature hordeSize) {
         HordeBattleStartEvent.Pre preEvent = new HordeBattleStartEvent.Pre(player, pokemonEntity);
         HordeEvents.RANDOM_HORDE_BATTLE_START_PRE.emit(preEvent);
         if (preEvent.isCanceled()) return null;
 
-        List<PokemonEntity> horde = manager.spawnHorde(player, pokemonEntity, leadingPokemon);
+        List<PokemonEntity> horde = manager.spawnHorde(player, pokemonEntity, leadingPokemon, hordeSize);
         return AsymmetricBattleBuilder.hordeBattle(BattleParticipant.player(player, leadingPokemon), BattleParticipant.horde(horde))
             .ifSuccessful(battle -> {
                 HordeBattleStartEvent.Post postEvent = new HordeBattleStartEvent.Post(player, Collections.unmodifiableList(horde), battle);
@@ -79,11 +91,11 @@ public class BattleBuilderMixin {
                 return Unit.INSTANCE;
             })
             .ifErrored(error -> {
-                horde.forEach(entity -> {
-                    if (!entity.isRemoved()) entity.discard();
-                });
-                return Unit.INSTANCE;
-            }
-        );
+                    horde.forEach(entity -> {
+                        if (!entity.isRemoved()) entity.discard();
+                    });
+                    return Unit.INSTANCE;
+                }
+            );
     }
 }
