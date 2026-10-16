@@ -17,6 +17,9 @@
   "entrypoints": {
     "main": [
       "com.necro.horde.encounters.fabric.HordeEncountersFabric"
+    ],
+    "client": [
+      "com.necro.horde.encounters.fabric.HordeEncountersFabricClient"
     ]
   },
   "mixins": [
