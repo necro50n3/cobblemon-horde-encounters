@@ -42,6 +42,7 @@ The only required field is `pokemon`.
 {
     "pokemon": "wooper paldean",
     "hordeRate": 0.03,
+    "size": "2-5",
     "spawns": [
         {
             "pokemon": "wooper paldean",
