@@ -1,13 +1,16 @@
 package com.necro.horde.encounters.common.api;
 
+import com.cobblemon.mod.common.api.battles.model.PokemonBattle;
 import com.cobblemon.mod.common.api.drop.DropTable;
 import com.cobblemon.mod.common.api.pokemon.PokemonProperties;
 import com.cobblemon.mod.common.api.pokemon.feature.IntSpeciesFeature;
+import com.cobblemon.mod.common.api.spawning.SpawnCause;
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.cobblemon.mod.common.util.PlayerExtensionsKt;
 import com.necro.asymmetric.battles.common.api.AsymmetricAPI;
 import com.necro.asymmetric.battles.common.api.spawning.BattleSpawnPool;
+import com.necro.asymmetric.battles.common.api.spawning.BattleSpawnablePosition;
 import com.necro.asymmetric.battles.common.registry.SpawnPoolTypeRegistry;
 import com.necro.asymmetric.battles.common.util.IBattleSpawn;
 import com.necro.asymmetric.battles.common.util.PropertyExtractors;
@@ -18,6 +21,7 @@ import com.necro.horde.encounters.common.spawning.HordeBattleSpawnPool;
 import kotlin.Unit;
 import kotlin.ranges.IntRange;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -32,6 +36,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 public class HordeManager {
     private final Pokemon pokemon;
@@ -60,18 +65,17 @@ public class HordeManager {
         List<PokemonEntity> horde = new ArrayList<>();
         horde.add(pokemonEntity);
         int size = hordeSize != null ? hordeSize.getValue() - 1 : this.pool.size(this.random);
-        for (int i = 0; i < size; i++) {
-            Pokemon pokemon = AsymmetricAPI.getRandomBattleSpawn(
-                this.pool,
-                player,
-                (ServerLevel) pokemonEntity.level(),
-                pokemonEntity.blockPosition(),
-                null,
-                this.properties,
-                this.pokemon.getLevel(),
-                () -> BattleSpawnPool.defaultSpawn(pokemonEntity.getPokemon(), new IntRange(HordeEncounters.CONFIG.default_level_offset.min(), HordeEncounters.CONFIG.default_level_offset.max())).create(pokemonEntity.getPokemon().getLevel(), player)
-            );
-            if (pokemon == null) continue;
+        List<Pokemon> spawns = this.getRandomSpawns(
+            player,
+            (ServerLevel) pokemonEntity.level(),
+            pokemonEntity.blockPosition(),
+            null,
+            this.pokemon.getLevel(),
+            () -> BattleSpawnPool.defaultSpawn(pokemonEntity.getPokemon(), new IntRange(HordeEncounters.CONFIG.default_level_offset.min(), HordeEncounters.CONFIG.default_level_offset.max())).create(pokemonEntity.getPokemon().getLevel(), player),
+            size
+        );
+        for (int i = 0; i < spawns.size(); i++) {
+            Pokemon pokemon = spawns.get(i);
             Vec3 sendOutPosition = this.getSendOutPosition(playerPos, pokemonEntity, pokemon, i);
             if (sendOutPosition == null) continue;
             ((IBattleSpawn) pokemon).aba_setBattleSpawn();
@@ -135,5 +139,23 @@ public class HordeManager {
         double parallelOffset = -((index / 2 == 0) ? 2.0 : 0.5);
 
         return wildPos.add(perpendicular.scale(perpendicularOffset)).add(parallel.scale(parallelOffset));
+    }
+
+    public List<Pokemon> getRandomSpawns(ServerPlayer player, ServerLevel level, BlockPos blockPos, PokemonBattle battle, int baseLevel, Supplier<Pokemon> defaultSpawn, int count) {
+        SpawnCause cause = new SpawnCause(AsymmetricAPI.SPAWNER, player);
+        BattleSpawnablePosition spawnablePosition = new BattleSpawnablePosition(cause, level, blockPos, List.of(), battle, this.properties, baseLevel);
+
+        List<Pokemon> spawns = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            Pokemon pokemon = this.getRandomSpawn(spawnablePosition, player, defaultSpawn);
+            if (pokemon != null) spawns.add(pokemon);
+        }
+        return spawns;
+    }
+
+    private Pokemon getRandomSpawn(BattleSpawnablePosition spawnablePosition, ServerPlayer player, Supplier<Pokemon> defaultSpawn) {
+        if (this.pool == null) return defaultSpawn.get();
+        Pokemon pokemon = this.pool.getRandom(spawnablePosition, player);
+        return pokemon != null ? pokemon : defaultSpawn.get();
     }
 }
