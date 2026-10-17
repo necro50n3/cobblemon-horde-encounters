@@ -144,18 +144,6 @@ public class HordeManager {
     public List<Pokemon> getRandomSpawns(ServerPlayer player, ServerLevel level, BlockPos blockPos, PokemonBattle battle, int baseLevel, Supplier<Pokemon> defaultSpawn, int count) {
         SpawnCause cause = new SpawnCause(AsymmetricAPI.SPAWNER, player);
         BattleSpawnablePosition spawnablePosition = new BattleSpawnablePosition(cause, level, blockPos, List.of(), battle, this.properties, baseLevel);
-
-        List<Pokemon> spawns = new ArrayList<>();
-        for (int i = 0; i < count; i++) {
-            Pokemon pokemon = this.getRandomSpawn(spawnablePosition, player, defaultSpawn);
-            if (pokemon != null) spawns.add(pokemon);
-        }
-        return spawns;
-    }
-
-    private Pokemon getRandomSpawn(BattleSpawnablePosition spawnablePosition, ServerPlayer player, Supplier<Pokemon> defaultSpawn) {
-        if (this.pool == null) return defaultSpawn.get();
-        Pokemon pokemon = this.pool.getRandom(spawnablePosition, player);
-        return pokemon != null ? pokemon : defaultSpawn.get();
+        return this.pool.getRandomSpawns(spawnablePosition, player, defaultSpawn, count);
     }
 }

@@ -10,13 +10,20 @@ import com.google.gson.reflect.TypeToken;
 import com.necro.asymmetric.battles.common.api.spawning.BattleSpawnDetail;
 import com.necro.asymmetric.battles.common.api.spawning.BattleSpawnDetailListAdapter;
 import com.necro.asymmetric.battles.common.api.spawning.BattleSpawnPool;
+import com.necro.asymmetric.battles.common.api.spawning.BattleSpawnablePosition;
+import com.necro.asymmetric.battles.common.util.DoubleWeightedRandomMap;
 import com.necro.asymmetric.battles.common.util.PropertyExtractors;
 import com.necro.horde.encounters.common.HordeEncounters;
 import kotlin.ranges.IntRange;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class HordeBattleSpawnPool extends BattleSpawnPool {
     public static final Gson GSON = new GsonBuilder()
@@ -38,6 +45,19 @@ public class HordeBattleSpawnPool extends BattleSpawnPool {
 
     public double hordeRate() {
         return this.hordeRate != null ? this.hordeRate : Math.clamp(HordeEncounters.CONFIG.default_horde_rate, 0.0, 1.0);
+    }
+
+    public List<Pokemon> getRandomSpawns(BattleSpawnablePosition spawnablePosition, ServerPlayer player, Supplier<Pokemon> defaultSpawn, int count) {
+        List<BattleSpawnDetail> validSpawns = this.validSpawns(spawnablePosition);
+        if (validSpawns.isEmpty()) return Stream.generate(defaultSpawn).limit(count).toList();
+        DoubleWeightedRandomMap<BattleSpawnDetail> spawnMap = DoubleWeightedRandomMap.fromMap(validSpawns.stream().collect(Collectors.toMap(detail -> detail, detail -> detail.getWeight(spawnablePosition))));
+        List<Pokemon> spawns = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            Pokemon spawn = spawnMap.getRandom(player.getRandom()).map(detail -> detail.create(spawnablePosition.baseLevel(), player)).orElse(null);
+            if (spawn == null) spawns.add(defaultSpawn.get());
+            else spawns.add(spawn);
+        }
+        return spawns;
     }
 
     public static HordeBattleSpawnPool create(Pokemon pokemon) {
