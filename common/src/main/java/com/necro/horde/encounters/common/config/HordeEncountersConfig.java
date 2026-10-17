@@ -22,7 +22,10 @@ public class HordeEncountersConfig implements ConfigData {
     public double default_horde_rate = 0.05;
 
     @Comment("The default minimum and maximum level offset relative to the lead Pokémon")
-    public HordeSettingsAdapter.LevelOffset default_level_offset = new HordeSettingsAdapter.LevelOffset(-5, 0);
+    public HordeSettingsAdapter.LevelOffset default_level_offset = new HordeSettingsAdapter.LevelOffset(0.4, 0.6);
+
+    @Comment("Whether to use the FLAT level offset or RELATIVE level offset")
+    public LevelOffsetMode level_offset_mode = LevelOffsetMode.RELATIVE;
 
     @Comment("A list of Pokémon labels to blacklist from random horde encounters.")
     public String[] label_blacklist = { "legendary", "mythical", "ultra_beast", "paradox" };

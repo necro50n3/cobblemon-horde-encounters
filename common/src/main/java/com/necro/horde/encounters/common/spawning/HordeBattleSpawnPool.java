@@ -14,6 +14,7 @@ import com.necro.asymmetric.battles.common.api.spawning.BattleSpawnablePosition;
 import com.necro.asymmetric.battles.common.util.DoubleWeightedRandomMap;
 import com.necro.asymmetric.battles.common.util.PropertyExtractors;
 import com.necro.horde.encounters.common.HordeEncounters;
+import com.necro.horde.encounters.common.config.ConfigCache;
 import kotlin.ranges.IntRange;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
@@ -66,7 +67,11 @@ public class HordeBattleSpawnPool extends BattleSpawnPool {
         pool.properties.setAspects(new HashSet<>(pokemon.getAspects()));
         pool.pokemon = pool.properties.asString(" ");
         pool.properties.setOriginalString(pool.pokemon);
-        pool.spawns.add(BattleSpawnPool.defaultSpawn(pokemon, new IntRange(HordeEncounters.CONFIG.default_level_offset.min(), HordeEncounters.CONFIG.default_level_offset.max())));
+
+        BattleSpawnDetail detail = BattleSpawnPool.defaultSpawn(pokemon, null);
+        ConfigCache.setLevelOffset(detail);
+
+        pool.spawns.add(detail);
         return pool;
     }
 }

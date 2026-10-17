@@ -4,8 +4,11 @@ import com.cobblemon.mod.common.api.pokemon.PokemonProperties;
 import com.cobblemon.mod.common.api.properties.CustomPokemonProperty;
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
 import com.cobblemon.mod.common.pokemon.properties.AspectPropertyType;
+import com.cobblemon.mod.common.util.math.DoubleRange;
+import com.necro.asymmetric.battles.common.api.spawning.BattleSpawnDetail;
 import com.necro.asymmetric.battles.common.util.PropertyExtractors;
 import com.necro.horde.encounters.common.HordeEncounters;
+import kotlin.ranges.IntRange;
 
 import java.util.*;
 
@@ -58,5 +61,10 @@ public class ConfigCache {
 
     private static boolean isAspectBlacklisted(PokemonEntity pokemonEntity) {
         return ASPECT_BLACKLIST.stream().anyMatch(aspect -> aspect.matches(pokemonEntity));
+    }
+
+    public static void setLevelOffset(BattleSpawnDetail detail) {
+        if (HordeEncounters.CONFIG.level_offset_mode == LevelOffsetMode.FLAT) detail.levelRangeOffset = new IntRange(HordeEncounters.CONFIG.default_level_offset.min().intValue(), HordeEncounters.CONFIG.default_level_offset.max().intValue());
+        else if (HordeEncounters.CONFIG.level_offset_mode == LevelOffsetMode.RELATIVE) detail.levelRangeRelativeOffset = new DoubleRange(HordeEncounters.CONFIG.default_level_offset.min(), HordeEncounters.CONFIG.default_level_offset.max());
     }
 }

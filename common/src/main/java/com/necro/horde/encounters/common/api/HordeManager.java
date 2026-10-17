@@ -9,17 +9,17 @@ import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.cobblemon.mod.common.util.PlayerExtensionsKt;
 import com.necro.asymmetric.battles.common.api.AsymmetricAPI;
+import com.necro.asymmetric.battles.common.api.spawning.BattleSpawnDetail;
 import com.necro.asymmetric.battles.common.api.spawning.BattleSpawnPool;
 import com.necro.asymmetric.battles.common.api.spawning.BattleSpawnablePosition;
 import com.necro.asymmetric.battles.common.registry.SpawnPoolTypeRegistry;
 import com.necro.asymmetric.battles.common.util.IBattleSpawn;
 import com.necro.asymmetric.battles.common.util.PropertyExtractors;
-import com.necro.horde.encounters.common.HordeEncounters;
+import com.necro.horde.encounters.common.config.ConfigCache;
 import com.necro.horde.encounters.common.events.HordeBattleRollEvent;
 import com.necro.horde.encounters.common.events.HordeEvents;
 import com.necro.horde.encounters.common.spawning.HordeBattleSpawnPool;
 import kotlin.Unit;
-import kotlin.ranges.IntRange;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -71,7 +71,11 @@ public class HordeManager {
             pokemonEntity.blockPosition(),
             null,
             this.pokemon.getLevel(),
-            () -> BattleSpawnPool.defaultSpawn(pokemonEntity.getPokemon(), new IntRange(HordeEncounters.CONFIG.default_level_offset.min(), HordeEncounters.CONFIG.default_level_offset.max())).create(pokemonEntity.getPokemon().getLevel(), player),
+            () -> {
+                BattleSpawnDetail detail = BattleSpawnPool.defaultSpawn(pokemonEntity.getPokemon(), null);
+                ConfigCache.setLevelOffset(detail);
+                return detail.create(pokemonEntity.getPokemon().getLevel(), player);
+            },
             size
         );
         for (int i = 0; i < spawns.size(); i++) {
