@@ -32,6 +32,6 @@ public class PokemonEntityMixin implements IHordeSpawner {
 
     @Inject(method = "load", at = @At("RETURN"))
     private void loadInject(CompoundTag nbt, CallbackInfo ci) {
-        if (nbt.contains("has_spawned_horde")) this.horde_hasSpawnedHorde = true;
+        this.horde_hasSpawnedHorde = nbt.getBoolean("has_spawned_horde");
     }
 }
