@@ -15,6 +15,9 @@ public class HordeEncountersConfig implements ConfigData {
     @Comment("Whether to enable the Sweet Scent effect to force a random horde encounter.")
     public boolean enable_sweet_scent = true;
 
+    @Comment("Whether wild Pokemon can retry attempts to spawn random horde encounters after the first encounter.")
+    public boolean can_retry_horde = false;
+
     @Comment("Default horde size for horde encounters.")
     public int default_horde_size = 5;
 

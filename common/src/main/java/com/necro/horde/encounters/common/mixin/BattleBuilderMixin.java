@@ -14,6 +14,7 @@ import com.necro.horde.encounters.common.api.HordeManager;
 import com.necro.horde.encounters.common.config.ConfigCache;
 import com.necro.horde.encounters.common.events.HordeBattleStartEvent;
 import com.necro.horde.encounters.common.events.HordeEvents;
+import com.necro.horde.encounters.common.util.IHordeSpawner;
 import kotlin.Unit;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
@@ -31,24 +32,17 @@ import java.util.UUID;
 public class BattleBuilderMixin {
     @Inject(method = "pve*", at = @At("HEAD"), remap = false, cancellable = true)
     private void pveHordeBattle(ServerPlayer player, PokemonEntity pokemonEntity, UUID leadingPokemon, BattleFormat battleFormat, boolean cloneParties, boolean healFirst, float fleeDistance, PartyStore party, CallbackInfoReturnable<BattleStartResult> cir) {
-        BattleStartResult featureStart = this.horde_startFeatureHorde(player, pokemonEntity, leadingPokemon, cir);
-        if (featureStart != null) {
-            cir.setReturnValue(featureStart);
-            return;
-        }
+        BattleStartResult start = this.horde_startFeatureHorde(player, pokemonEntity, leadingPokemon, cir);
+        if (start == null) start = this.horde_startHerdHorde(player, pokemonEntity, leadingPokemon, cir);
+        if (start == null) start = this.horde_startRandomHorde(player, pokemonEntity, leadingPokemon, cir);
 
-        BattleStartResult herdStart = this.horde_startHerdHorde(player, pokemonEntity, leadingPokemon, cir);
-        if (herdStart != null) {
-            cir.setReturnValue(herdStart);
-            return;
-        }
-
-        BattleStartResult randomStart = this.horde_startRandomHorde(player, pokemonEntity, leadingPokemon, cir);
-        if (randomStart != null) cir.setReturnValue(randomStart);
+        ((IHordeSpawner) pokemonEntity).horde_setSpawnedHorde();
+        if (start != null) cir.setReturnValue(start);
     }
 
     @Unique
     private @Nullable BattleStartResult horde_startFeatureHorde(ServerPlayer player, PokemonEntity pokemonEntity, UUID leadingPokemon, CallbackInfoReturnable<BattleStartResult> cir) {
+        if (this.horde_hasTriedSpawnHorde(pokemonEntity)) return null;
         IntSpeciesFeature feature = pokemonEntity.getPokemon().getFeature("horde_size");
         if (feature == null || feature.getValue() == 0) return null;
         else if (feature.getValue() == 1) return cir.getReturnValue();
@@ -79,8 +73,14 @@ public class BattleBuilderMixin {
     }
 
     @Unique
+    private boolean horde_hasTriedSpawnHorde(PokemonEntity pokemonEntity) {
+        return ((IHordeSpawner) pokemonEntity).horde_hasSpawnedHorde() && !HordeEncounters.CONFIG.can_retry_horde;
+    }
+
+    @Unique
     private @Nullable BattleStartResult horde_startRandomHorde(ServerPlayer player, PokemonEntity pokemonEntity, UUID leadingPokemon, CallbackInfoReturnable<BattleStartResult> cir) {
         if (!HordeEncounters.CONFIG.enable_random_hordes) return null;
+        else if (this.horde_hasTriedSpawnHorde(pokemonEntity)) return null;
         else if (!ConfigCache.canHorde(pokemonEntity)) return null;
 
         HordeManager manager = new HordeManager(pokemonEntity);
