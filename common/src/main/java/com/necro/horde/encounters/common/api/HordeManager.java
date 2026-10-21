@@ -25,6 +25,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.BlockHitResult;
@@ -91,6 +92,7 @@ public class HordeManager {
             newEntity.setDrops(new DropTable());
             horde.add(newEntity);
         }
+        pokemonEntity.playSound(SoundEvents.WIND_CHARGE_BURST.value());
         return horde;
     }
 
