@@ -1,0 +1,3 @@
+- Bumped to Asymmetric Battles API 1.3.1 and Cobblemon 1.8.2.
+- Added config option to toggle whether wild Pokemon can retry to spawn random horde encounters.
+- Added a sound to horde spawns.

@@ -3,6 +3,7 @@ plugins {
     id 'architectury-plugin' version '3.4-SNAPSHOT'
     id 'com.gradleup.shadow' version '9.6.1' apply false
     id 'org.jetbrains.kotlin.jvm' version '2.2.10'
+    id "me.modmuss50.mod-publish-plugin" version "2.2.1"
 }
 
 architectury {
@@ -18,6 +19,7 @@ subprojects {
     apply plugin: 'dev.architectury.loom'
     apply plugin: 'architectury-plugin'
     apply plugin: 'org.jetbrains.kotlin.jvm'
+    apply plugin: 'com.gradleup.shadow'
 
     idea {
         module {
@@ -64,5 +66,68 @@ subprojects {
 
     tasks.withType(JavaCompile).configureEach {
         it.options.release = 21
+    }
+}
+
+Properties dotenv = new Properties()
+File envFile = file(".env")
+
+if (envFile.exists()) {
+    envFile.withInputStream { stream -> dotenv.load(stream) }
+}
+
+def resolveEnv = { String key ->
+    String value = dotenv.getProperty(key)
+    return value != null ? value : System.getenv(key)
+}
+
+publishMods {
+    changelog = file("CHANGELOG.md").text
+    type = STABLE
+
+    def cfOptions = curseforgeOptions {
+        accessToken = resolveEnv("CURSEFORGE_TOKEN")
+        projectId = project.curseforge_id
+        minecraftVersions.add(project.minecraft_version)
+        javaVersions.add(JavaVersion.VERSION_21)
+        clientRequired = true
+        serverRequired = true
+        projectSlug = "cobblemon-horde-encounters"
+    }
+
+    def mrOptions = modrinthOptions {
+        accessToken = resolveEnv("MODRINTH_TOKEN")
+        projectId = project.modrinth_id
+        minecraftVersions.add(project.minecraft_version)
+    }
+
+    curseforge("curseforgeFabric") {
+        from cfOptions
+        file project(":fabric")
+        displayName = file.map { it.asFile.name }
+        modLoaders.add("fabric")
+        requires("asymmetric-battles-api")
+    }
+
+    curseforge("curseforgeNeoForge") {
+        from cfOptions
+        file project(":neoforge")
+        displayName = file.map { it.asFile.name }
+        modLoaders.add("neoforge")
+        requires("asymmetric-battles-api")
+    }
+
+    modrinth("modrinthFabric") {
+        from mrOptions
+        file project(":fabric")
+        modLoaders.add("fabric")
+        requires("asymmetric-battles-api")
+    }
+
+    modrinth("modrinthNeoForge") {
+        from mrOptions
+        file project(":neoforge")
+        modLoaders.add("neoforge")
+        requires("asymmetric-battles-api")
     }
 }
