@@ -1,3 +1,2 @@
-- Bumped to Asymmetric Battles API 1.3.1 and Cobblemon 1.8.2.
-- Added config option to toggle whether wild Pokemon can retry to spawn random horde encounters.
-- Added a sound to horde spawns.
+- Fixed crash when starting a horde battle from a fishing encounter.
+- Updated default aspect blacklist with new raid boss aspect.
