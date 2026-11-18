@@ -5,6 +5,7 @@ import com.cobblemon.mod.common.api.drop.DropTable;
 import com.cobblemon.mod.common.api.pokemon.PokemonProperties;
 import com.cobblemon.mod.common.api.pokemon.feature.IntSpeciesFeature;
 import com.cobblemon.mod.common.api.spawning.SpawnCause;
+import com.cobblemon.mod.common.api.storage.party.PlayerPartyStore;
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.cobblemon.mod.common.util.PlayerExtensionsKt;
@@ -33,10 +34,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Supplier;
 
 public class HordeManager {
@@ -60,8 +58,10 @@ public class HordeManager {
         return event.roll(this.random);
     }
 
-    public List<PokemonEntity> spawnHorde(ServerPlayer player, PokemonEntity pokemonEntity, UUID leadingPokemon, @Nullable IntSpeciesFeature hordeSize) {
-        Vec3 playerPos = this.playerPosition(player, PlayerExtensionsKt.party(player).get(leadingPokemon), pokemonEntity);
+    public List<PokemonEntity> spawnHorde(ServerPlayer player, PokemonEntity pokemonEntity, @Nullable UUID leadingPokemon, @Nullable IntSpeciesFeature hordeSize) {
+        PlayerPartyStore party = PlayerExtensionsKt.party(player);
+        Pokemon lead = leadingPokemon != null ? party.get(leadingPokemon) : party.toGappyList().stream().filter(Objects::nonNull).findFirst().orElse(null);
+        Vec3 playerPos = this.playerPosition(player, lead, pokemonEntity);
 
         List<PokemonEntity> horde = new ArrayList<>();
         horde.add(pokemonEntity);
@@ -102,7 +102,7 @@ public class HordeManager {
         double actorDistance = actorOffset.length();
         if (actorDistance == 0.0) return playerPos;
 
-        float pokemonWidth = playerPokemon.getForm().getHitbox().width() * playerPokemon.getForm().getBaseScale();
+        float pokemonWidth = playerPokemon != null ? playerPokemon.getForm().getHitbox().width() * playerPokemon.getForm().getBaseScale() : 1.0F;
 
         double minDistance = 8.0;
         Vec3 basePos = playerPos;
